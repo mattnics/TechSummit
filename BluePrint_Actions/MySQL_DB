@@ -33,3 +33,8 @@ firewall-cmd --reload
 #USE @@{Database_name}@@;
 #CREATE TABLE emails (id MEDIUMINT NOT NULL AUTO_INCREMENT,name varchar(255),email varchar(255),PRIMARY KEY (id));
 #EOF
+
+#install Git
+yum -y install git
+
+#clone resources
