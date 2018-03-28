@@ -1,0 +1,35 @@
+#!/bin/bash
+set -ex
+# install mySQL
+yum install -y "http://repo.mysql.com/mysql-community-release-el7.rpm"
+yum install -y mysql-community-server.x86_64
+
+systemctl enable mysqld
+systemctl start mysqld
+
+#Mysql secure installation
+mysql -u root<<-EOF
+
+UPDATE mysql.user SET Password=PASSWORD('@@{Mysql_password}@@') WHERE User='@@{Mysql_user}@@';
+DELETE FROM mysql.user WHERE User='@@{Mysql_user}@@' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';
+
+FLUSH PRIVILEGES;
+EOF
+
+#Install and configure the firewall
+yum install firewalld -y
+systemctl enable firewalld
+systemctl start firewalld
+firewall-cmd --add-service=mysql --permanent
+firewall-cmd --reload
+
+#Create new DB and create an empty Table for data
+#mysql -u @@{Mysql_user}@@ -p@@{Mysql_password}@@ <<-EOF
+#CREATE DATABASE @@{Database_name}@@;
+#GRANT ALL PRIVILEGES ON @@{Database_name}@@.* TO '@@{Mysql_user}@@'@'%' identified by '@@{Mysql_password}@@';
+#FLUSH PRIVILEGES;
+#USE @@{Database_name}@@;
+#CREATE TABLE emails (id MEDIUMINT NOT NULL AUTO_INCREMENT,name varchar(255),email varchar(255),PRIMARY KEY (id));
+#EOF
